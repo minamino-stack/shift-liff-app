@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>明日の予定入力</title>
+  <style>
+    /* （前回と同じなので省略しますが、同じCSSを入れてください） */
+    body { font-family: sans-serif; padding: 20px; background-color: #f5f6f6; }
+    .container { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    h2 { font-size: 18px; text-align: center; color: #333; margin-top: 0; }
+    label { display: block; margin: 15px 0 5px; font-weight: bold; color: #555; font-size: 14px; }
+    input[type="time"], select, input[type="text"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px;}
+    .hidden { display: none; }
+    button { width: 100%; padding: 12px; background-color: #06C755; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; margin-top: 25px; cursor: pointer; }
+    button:disabled { background-color: #ccc; }
+    #status { margin-top: 15px; text-align: center; color: #d9534f; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>明日の予定入力</h2>
+    <form id="scheduleForm">
+      <label>出発時刻</label>
+      <input type="time" id="departureTime" required>
+      <label>到着時刻</label>
+      <input type="time" id="arrivalTime" required>
+      <label>移動手段</label>
+      <select id="transport" required onchange="toggleReason()">
+        <option value="">選択してください</option>
+        <option value="公共交通機関">公共交通機関</option>
+        <option value="車">車</option>
+      </select>
+      <div id="reasonArea" class="hidden">
+        <label>車利用の理由（必須）</label>
+        <input type="text" id="reason" placeholder="例：機材運搬のため">
+      </div>
+      <button type="button" id="submitBtn" onclick="submitForm()">送信する</button>
+      <div id="status"></div>
+    </form>
+  </div>
+
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script>
+    const MY_LIFF_ID = "2009747290-42vTyBkS";
+    // ★先ほど更新したGASのウェブアプリURLを貼り付けてください
+    const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzamVHO9RYKUs0-ohSeIFs5P1aeuKzujs6CPaKqj-uFeWbVViYHGMqaEpZLCb2jyM6yTw/exec";
+
+    liff.init({ liffId: MY_LIFF_ID }).then(() => {
+      if (!liff.isLoggedIn()) { liff.login(); }
+    }).catch((err) => {
+      document.getElementById("status").innerText = "LIFFの初期化に失敗しました。";
+    });
+
+    function toggleReason() {
+      const transport = document.getElementById("transport").value;
+      const reasonArea = document.getElementById("reasonArea");
+      if (transport === "車") {
+        reasonArea.classList.remove("hidden");
+      } else {
+        reasonArea.classList.add("hidden");
+        document.getElementById("reason").value = ""; 
+      }
+    }
+
+    function submitForm() {
+      const departureTime = document.getElementById("departureTime").value;
+      const arrivalTime = document.getElementById("arrivalTime").value;
+      const transport = document.getElementById("transport").value;
+      const reason = document.getElementById("reason").value;
+
+      if (!departureTime || !arrivalTime || !transport) {
+        document.getElementById("status").innerText = "未入力の項目があります。";
+        return;
+      }
+      if (transport === "車" && !reason) {
+        document.getElementById("status").innerText = "車の利用理由を入力してください。";
+        return;
+      }
+
+      document.getElementById("submitBtn").disabled = true;
+      document.getElementById("submitBtn").innerText = "送信中...";
+      document.getElementById("status").innerText = "";
+
+      liff.getProfile().then(profile => {
+        const formData = {
+          type: 'liff_submit', // これでGAS側が「フォームからの送信だ」と判別します
+          userId: profile.userId,
+          departureTime: departureTime,
+          arrivalTime: arrivalTime,
+          transport: transport,
+          reason: reason
+        };
+
+        // GASへデータを送信
+        fetch(GAS_WEBAPP_URL, {
+          method: 'POST',
+          body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.result === "success") {
+            alert("登録が完了しました！");
+            liff.closeWindow(); 
+          } else if (data.result === "not_found") {
+            alert("明日のシフトにあなたの名前が見つかりません。");
+            document.getElementById("submitBtn").disabled = false;
+            document.getElementById("submitBtn").innerText = "送信する";
+          }
+        })
+        .catch(error => {
+          alert("通信エラーが発生しました。");
+          document.getElementById("submitBtn").disabled = false;
+          document.getElementById("submitBtn").innerText = "送信する";
+        });
+          
+      }).catch(err => {
+        alert("LINEプロフィールの取得に失敗しました。");
+      });
+    }
+  </script>
+</body>
+</html>
