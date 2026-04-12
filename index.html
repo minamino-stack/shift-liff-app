@@ -9,7 +9,20 @@
     .container { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     h2 { font-size: 18px; text-align: center; color: #333; margin-top: 0; }
     label { display: block; margin: 15px 0 5px; font-weight: bold; color: #555; font-size: 14px; }
-    input[type="time"], select, input[type="text"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px;}
+    
+    /* ▼★修正ポイント：iPhone等のブラウザ独自デザインをリセットし、幅をピタッと揃える */
+    input[type="time"], select, input[type="text"] { 
+      width: 100%; 
+      display: block; /* ブロック要素にして横幅を強制する */
+      margin: 0; /* ブラウザ独自の余白を消去 */
+      padding: 10px; 
+      border: 1px solid #ccc; 
+      border-radius: 4px; 
+      box-sizing: border-box; 
+      font-size: 16px;
+      background-color: #fff; /* iPhoneの入力欄がグレーになるのを防ぐ */
+    }
+    
     .hidden { display: none; }
     button { width: 100%; padding: 12px; background-color: #06C755; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; margin-top: 25px; cursor: pointer; }
     button:disabled { background-color: #ccc; }
@@ -43,7 +56,7 @@
   <script>
     const MY_LIFF_ID = "2009747290-42vTyBkS";
     
-    // ★先ほど新しくコピーしたGASのURLをここに貼り付けてください！
+    // ★GASのURL
     const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx2BmeLP1Klem8JgLj2ncfqTzEWwMOd590omIaEAsq04JYVvWNIt3Ihhru_dzNNTBLakg/exec";
 
     liff.init({ liffId: MY_LIFF_ID }).then(() => {
@@ -84,7 +97,7 @@
 
       liff.getProfile().then(profile => {
         
-        // ★ここが最大のポイント！GET通信用のパラメータを作成
+        // GET通信用のパラメータを作成
         const params = new URLSearchParams({
           type: 'liff_submit',
           userId: profile.userId,
@@ -94,7 +107,7 @@
           reason: reason || ""
         });
 
-        // ★POSTではなくGETでURLにデータをくっつけて送信する
+        // POSTではなくGETでURLにデータをくっつけて送信する
         fetch(GAS_WEBAPP_URL + "?" + params.toString())
         .then(response => response.json())
         .then(data => {
