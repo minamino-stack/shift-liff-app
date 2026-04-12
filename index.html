@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>明日の予定入力</title>
   <style>
-    /* ▼★魔法の1行：ページ内の全要素の幅計算を統一する（絶対にズレないようにする） */
+    /* 全要素の幅計算を統一 */
     * { box-sizing: border-box; }
 
     body { font-family: sans-serif; padding: 20px; background-color: #f5f6f6; margin: 0; }
@@ -13,22 +13,33 @@
     h2 { font-size: 18px; text-align: center; color: #333; margin-top: 0; }
     label { display: block; margin: 15px 0 5px; font-weight: bold; color: #555; font-size: 14px; }
     
-    /* ▼★iOSの強制デザインを解除して、横幅を完璧に揃える */
+    /* ▼★高さを「48px」に固定して、入力前後での枠の伸縮を完全に防ぐ */
     input[type="time"], select, input[type="text"] { 
       width: 100%; 
+      height: 48px; /* ←★これを追加（常に同じ高さを保つ） */
       display: block; 
       margin: 0; 
       padding: 10px; 
       border: 1px solid #ccc; 
       border-radius: 4px; 
       font-size: 16px;
+      font-family: inherit; /* スマホ特有のフォントによるズレを防ぐ */
       background-color: #fff;
-      -webkit-appearance: none; /* iOS特有の余白や丸みをリセット */
+      -webkit-appearance: none; 
       appearance: none;
+    }
+
+    /* ▼★iOSリセットで消えてしまう「▼（矢印）」を右端に綺麗に復活させる */
+    select {
+      background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M7%2010l5%205%205-5z%22%2F%3E%3C%2Fsvg%3E');
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 24px;
+      padding-right: 40px; /* 矢印と文字が被らないように右に余白を作る */
     }
     
     .hidden { display: none; }
-    button { width: 100%; padding: 12px; background-color: #06C755; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; margin-top: 25px; cursor: pointer; }
+    button { width: 100%; padding: 12px; height: 50px; background-color: #06C755; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; margin-top: 25px; cursor: pointer; }
     button:disabled { background-color: #ccc; }
     #status { margin-top: 15px; text-align: center; color: #d9534f; font-weight: bold; }
   </style>
