@@ -5,22 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>明日の予定入力</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; background-color: #f5f6f6; }
+    /* ▼★魔法の1行：ページ内の全要素の幅計算を統一する（絶対にズレないようにする） */
+    * { box-sizing: border-box; }
+
+    body { font-family: sans-serif; padding: 20px; background-color: #f5f6f6; margin: 0; }
     .container { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     h2 { font-size: 18px; text-align: center; color: #333; margin-top: 0; }
     label { display: block; margin: 15px 0 5px; font-weight: bold; color: #555; font-size: 14px; }
     
-    /* ▼★修正ポイント：iPhone等のブラウザ独自デザインをリセットし、幅をピタッと揃える */
+    /* ▼★iOSの強制デザインを解除して、横幅を完璧に揃える */
     input[type="time"], select, input[type="text"] { 
       width: 100%; 
-      display: block; /* ブロック要素にして横幅を強制する */
-      margin: 0; /* ブラウザ独自の余白を消去 */
+      display: block; 
+      margin: 0; 
       padding: 10px; 
       border: 1px solid #ccc; 
       border-radius: 4px; 
-      box-sizing: border-box; 
       font-size: 16px;
-      background-color: #fff; /* iPhoneの入力欄がグレーになるのを防ぐ */
+      background-color: #fff;
+      -webkit-appearance: none; /* iOS特有の余白や丸みをリセット */
+      appearance: none;
     }
     
     .hidden { display: none; }
@@ -97,7 +101,6 @@
 
       liff.getProfile().then(profile => {
         
-        // GET通信用のパラメータを作成
         const params = new URLSearchParams({
           type: 'liff_submit',
           userId: profile.userId,
@@ -107,7 +110,6 @@
           reason: reason || ""
         });
 
-        // POSTではなくGETでURLにデータをくっつけて送信する
         fetch(GAS_WEBAPP_URL + "?" + params.toString())
         .then(response => response.json())
         .then(data => {
